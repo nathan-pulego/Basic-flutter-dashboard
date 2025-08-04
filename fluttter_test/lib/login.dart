@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttter_test/auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,7 +13,9 @@ class _LoginPageState extends State<LoginPage> {
       TextEditingController(); //<--- updates state
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final AuthService loginAuth = AuthService();
   bool _agreedToTerms = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -26,11 +29,63 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  final Map<String, String> loginKeys = {
-    'Nathan123@outlook.com': 'Nathan123',
-    'Bob123@gmail.com': 'Bob12345',
-    'Vini@yahoo.com': 'Vini12345',
-  };
+  Future<void> _login() async {
+    // First, validate the form. If it's not valid, do nothing.
+    if (!_formKey.currentState!.validate()) {
+      return; //<== do nothing if form is invalid
+    } 
+
+    // Then, check if terms are agreed to.
+    if (!_agreedToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please agree to the terms and conditions.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Call the login method from our AuthService
+      await loginAuth.login(
+        _emailController.text,
+        _passwordController.text,
+      );
+
+      // The service handles the status code check. If we get here, it was successful.
+      if (mounted) {
+        Navigator.pushNamed(
+          context,
+          '/dashboard',
+          arguments: _emailController.text,
+        );
+      }
+    } catch (e) {
+      // The loginAuth function throws an exception on any failure (bad credentials, network error, etc.).
+      // We can catch it and show a user-friendly message.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            // In a real app, you might want to log the actual error `e` for debugging.
+            content: const Text('Login failed. Please check your credentials and connection.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      // This will run whether the request was successful or not.
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,50 +192,17 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 20),
 
                   ElevatedButton(
-                    onPressed: () {
-                      // Trigger validation when button is pressed
-                      if (_formKey.currentState!.validate()) {
-                        final emailValue = _emailController.text;
-                        final passwordValue = _passwordController.text;
-
-                        if (!_agreedToTerms) {
-                          // <== catch clause, always start checking invalid states and deal with them before main logic
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Please agree to the terms and conditions.',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                              duration: Duration(seconds: 2),
+                    onPressed: _isLoading ? null : _login,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.purple,
+                              strokeWidth: 2.0,
                             ),
-                          );
-                        }
-
-                        if (loginKeys.containsKey(emailValue) &&
-                            loginKeys[emailValue] == passwordValue) {
-                          // <== if lookup finds a stored email(key), it performs a second lookup of the assiociated value with the loopup key
-
-                          //append dashboard to navigation pages
-                          Navigator.pushNamed(
-                            context,
-                            '/dashboard',
-                            arguments: emailValue,
-                          );
-                        } else {
-                          // If the form is invalid, validators will display error messages
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Invalid Login',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    child: const Text('Login'),
+                          )
+                        : const Text('Login'),
                   ),
                 ],
               ),

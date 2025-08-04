@@ -16,8 +16,7 @@ class _DashboardPageState extends State<DashboardPage> {
         .didChangeDependencies(); //<== retrieve arguments passed (persisted data)
     final String? receivedEmail =
         ModalRoute.of(context)!.settings.arguments
-            as String?; // <== '!' null assetion operator - can be certain value will never be null,
-            // as String? is type casting the incoming data to string
+            as String?; // <== '!' null assetion operator - can be certain value will never be null,  // as String? is type casting the incoming data to string
     if (receivedEmail != null) {
       //<== if email is not blank, update the state
       setState(() {
