@@ -52,17 +52,20 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       // Call the login method from our AuthService
-      await loginAuth.login(
+      final responseData = await loginAuth.login(
         _emailController.text,
         _passwordController.text,
       );
 
       // The service handles the status code check. If we get here, it was successful.
       if (mounted) {
+        // Based on your API response, the username is at the top level.
+        // We extract it here and provide a default value if it's not found.
+        final String username = responseData['username'] ?? 'User';
         Navigator.pushNamed(
           context,
           '/dashboard',
-          arguments: _emailController.text,
+          arguments: username,
         );
       }
     } catch (e) {
@@ -71,8 +74,9 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            // In a real app, you might want to log the actual error `e` for debugging.
-            content: const Text('Login failed. Please check your credentials and connection.'),
+            // Display the specific error message from the AuthService exception.
+            // The replaceFirst removes the "Exception: " prefix for a cleaner message.
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
             backgroundColor: Colors.red,
           ),
         );

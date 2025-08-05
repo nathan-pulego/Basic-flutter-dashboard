@@ -8,19 +8,19 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  String? _userEmail; // A String variable to store the received email
+  String? _userName; // A String variable to store the received username
 
   @override
   void didChangeDependencies() {
     super
         .didChangeDependencies(); //<== retrieve arguments passed (persisted data)
-    final String? receivedEmail =
+    final String? receivedUsername =
         ModalRoute.of(context)!.settings.arguments
             as String?; // <== '!' null assetion operator - can be certain value will never be null,  // as String? is type casting the incoming data to string
-    if (receivedEmail != null) {
-      //<== if email is not blank, update the state
+    if (receivedUsername != null) {
+      //<== if username is not blank, update the state
       setState(() {
-        _userEmail = receivedEmail;
+        _userName = receivedUsername;
       });
     }
   }
@@ -31,7 +31,7 @@ class _DashboardPageState extends State<DashboardPage> {
       appBar: AppBar(title: const Text('Dashboard')),
       body: Center(
         child: Text(
-          'Welcome ${_userEmail ?? 'User'}!',
+          'Welcome ${_userName ?? 'User'}!',
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ), //<== string lteral + tristate op. if username is empty, default val is user
       ),

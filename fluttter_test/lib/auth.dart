@@ -2,25 +2,44 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  final String baseUrl =
-      'https://reqres.in/api'; // Using a mock API for demonstration
+  // **THE FIX**: For a physical device, you must use your computer's Wi-Fi IP address.
+  // Ensure your phone and computer are on the SAME Wi-Fi network.
+  final String baseUrl = 'http://192.168.8.64:3000';
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    // --- 1. Print the information before sending the request ---
-    print('--- Sending Login Request ---');
-    print('${email}, ${password}');
-    final response = await http.post(
-      Uri.parse('$baseUrl/login'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{'email': email, 'password': password}),
-    );
+    final Uri loginUrl = Uri.parse('$baseUrl/auth/login');
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to login');
+    print('--- Sending Login Request ---');
+    print('Request URL: $loginUrl');
+    // Corrected the print statement to match the actual body being sent.
+    print('Request Body: {"email": "$email", "password": "..."}');
+
+    try {
+      final response = await http.post(
+        loginUrl,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        // 4. The JSON body must use the 'username' key.
+        body: jsonEncode(<String, String>{
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Login successful!');
+        return jsonDecode(response.body);
+      } else {
+        // Provide more detailed error logging for debugging.
+        print('Failed to login. Status Code: ${response.statusCode}');
+        print('Response Body: ${response.body}');
+        throw Exception('Failed to login');
+      }
+    } catch (e) {
+      // Catch network-level errors (e.g., can't connect).
+      print('A network error occurred: $e');
+      throw Exception('Failed to connect to the server. Is the API running and on the same network?');
     }
   }
 }
