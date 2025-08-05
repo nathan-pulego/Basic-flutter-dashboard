@@ -51,7 +51,8 @@ class _DashboardPageState extends State<DashboardPage> {
   void _showTaskPanel({Task? task}) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Ensures the sheet is responsive to the keyboard
+      isScrollControlled:
+          true, // Ensures the sheet is responsive to the keyboard
       builder: (context) {
         return TaskForm(
           task: task, // Pass the existing task if editing, or null if adding.
@@ -93,14 +94,20 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> _addTask(String title, String description) async {
-    final newTask = await _taskService.createTask(title, description, _userId!);
-    setState(() => _tasks.insert(0, newTask));
+    final newTask = await _taskService.createTask(title, description, _userId!, _userName!);
+    if (mounted) {
+      setState(() => _tasks.insert(0, newTask));
+    }
   }
 
-  Future<void> _updateTask(Task task, String newTitle, String newDescription) async {
+  Future<void> _updateTask(
+    Task task,
+    String newTitle,
+    String newDescription,
+  ) async {
     task.title = newTitle;
     task.description = newDescription;
-    await _taskService.updateTask(task);
+    await _taskService.updateTask(task, _userId!);
     setState(() {}); // Just rebuild the UI to show the change
   }
 
@@ -111,7 +118,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Future<void> _toggleCompleted(Task task) async {
     task.completed = !task.completed;
-    await _taskService.updateTask(task);
+    await _taskService.updateTask(task, _userId!);
     setState(() {});
   }
 
@@ -119,16 +126,17 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 138, 16, 168), 
+        backgroundColor: const Color.fromARGB(255, 138, 16, 168),
         foregroundColor: Colors.white,
         toolbarHeight: 80,
-        centerTitle: true, 
+        centerTitle: true,
         title: Text(
           'Welcome, ${_userName ?? 'User'}',
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 24, 
-            color: Colors.white,)
+            fontSize: 24,
+            color: Colors.white,
+          ),
         ),
       ),
       body: _buildBody(),
@@ -146,9 +154,7 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     if (_error != null) {
-      return Center(
-        child: Text('An error occurred: $_error'),
-      );
+      return Center(child: Text('An error occurred: $_error'));
     }
 
     if (_tasks.isEmpty) {

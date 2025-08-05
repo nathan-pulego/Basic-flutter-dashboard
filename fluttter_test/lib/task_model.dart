@@ -3,14 +3,14 @@ class Task {
   String title;
   String description;
   bool completed;
-  final int owner;
+  final String username; // Changed from int owner to String username
 
   Task({
     required this.id,
     required this.title,
     required this.description,
     required this.completed,
-    required this.owner,
+    required this.username, // Changed
   });
 
   // A factory constructor for creating a new Task instance from a map.
@@ -21,7 +21,7 @@ class Task {
       title: json['title'],
       description: json['description'],
       completed: json['completed'],
-      owner: json['owner'] as int,
+      username: json['username'], // Changed
     );
   }
 
@@ -33,7 +33,7 @@ class Task {
       'title': title,
       'description': description,
       'completed': completed,
-      'owner': owner,
+      'username': username, // Changed
     };
   }
 }
