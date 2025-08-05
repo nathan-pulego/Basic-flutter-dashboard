@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {
-  // **THE FIX**: For a physical device, you must use your computer's Wi-Fi IP address.
-  // Ensure your phone and computer are on the SAME Wi-Fi network.
-  final String baseUrl = 'http://192.168.8.64:3000';
+  // Read the base URL from the .env file.
+  // Provide a fallback value in case it's not set.
+  final String baseUrl = dotenv.env['BASE_URL'] ?? 'http://localhost:3000';
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     final Uri loginUrl = Uri.parse('$baseUrl/auth/login');
