@@ -1,9 +1,9 @@
 class Task {
-  final String id;
-  final String title;
-  final String description;
+  final int id;
+  String title;
+  String description;
   bool completed;
-  final String owner;
+  final int owner;
 
   Task({
     required this.id,
@@ -17,11 +17,23 @@ class Task {
   // This defines the structure of the data coming from the API
   factory Task.fromJson(Map<String, dynamic> json) {
     return Task(
-      id: json['id'],
+      id: json['id'] as int,
       title: json['title'],
       description: json['description'],
       completed: json['completed'],
-      owner: json['owner'],
+      owner: json['owner'] as int,
     );
+  }
+
+  // A method for converting a Task instance to a map.
+  // This will be useful when sending data to your API.
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'completed': completed,
+      'owner': owner,
+    };
   }
 }

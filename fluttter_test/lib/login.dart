@@ -60,9 +60,22 @@ class _LoginPageState extends State<LoginPage> {
       // The service handles the status code check. If we get here, it was successful.
       if (mounted) {
         //Api response will respond with a username, we will put it here
-        // We extract it here and provide a default value if it's not found.
-        final String username = responseData['username'] ?? 'User';
-        Navigator.pushNamed(context, '/dashboard', arguments: username);
+        final String? username = responseData['username'];
+        final int? userId = responseData['userId']; // Assuming API returns 'userId' as an int
+
+        // It's crucial to have both username and userId to proceed.
+        if (username == null || userId == null) {
+          // If the server response is missing critical data, treat it as an error.
+          throw Exception('Login failed: Invalid data from server.');
+        }
+
+        // Use Map<String, dynamic> to hold values of different types.
+        final Map<String, dynamic> userArgs = {
+          'username': username,
+          'userId': userId,
+        };
+
+        Navigator.pushNamed(context, '/dashboard', arguments: userArgs);
       }
     } catch (e) {
       // The loginAuth function throws an exception on any failure (bad credentials, network error, etc.).

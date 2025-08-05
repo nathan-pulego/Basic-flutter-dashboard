@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fluttter_test/task_model.dart';
 import 'package:fluttter_test/task_card.dart';
+import 'package:fluttter_test/task_service.dart'; // We'll use the service directly
+import 'package:fluttter_test/task_form.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -10,8 +12,15 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  String? _userName; // A String variable to store the received username
-  List<Task> _tasks = []; // A list to hold the user's tasks
+  String? _userName;
+  int? _userId;
+
+  // State is now managed directly inside the widget
+  final TaskService _taskService = TaskService();
+  List<Task> _tasks = [];
+  bool _isLoading = true; // Start in loading state
+  String? _error;
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -19,38 +28,91 @@ class _DashboardPageState extends State<DashboardPage> {
     // Use a post-frame callback to safely access the context for ModalRoute.
     // This ensures the widget is fully built before we try to get arguments.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Retrieve arguments passed from the login page.
-      final String? receivedUsername =
-          ModalRoute.of(context)?.settings.arguments as String?;
+      if (!_isInitialized) {
+        _isInitialized = true; // Prevent this from running again
+        // Retrieve the map of arguments passed from the login page.
+        final arguments =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
-      if (receivedUsername != null) {
         setState(() {
-          _userName = receivedUsername;
-
-          _tasks = [
-            Task(
-                id: '1',
-                title: 'Complete Flutter UI',
-                description: 'Finish the dashboard and task card widgets.',
-                completed: true,
-                owner: _userName!),
-            Task(
-                id: '2',
-                title: 'Set up Dashboard Service',
-                description:
-                    'Create the service file to fetch tasks from the API.',
-                completed: false,
-                owner: _userName!),
-            Task(
-                id: '3',
-                title: 'Test API Connection',
-                description: '',
-                completed: false,
-                owner: _userName!),
-          ];
+          _userName = arguments?['username'] as String?;
+          _userId = arguments?['userId'] as int?;
         });
+
+        // Fetch tasks if we have a user ID
+        if (_userId != null) {
+          _fetchTasks();
+        }
       }
     });
+  }
+
+  // This single method now handles both adding and editing tasks.
+  void _showTaskPanel({Task? task}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Ensures the sheet is responsive to the keyboard
+      builder: (context) {
+        return TaskForm(
+          task: task, // Pass the existing task if editing, or null if adding.
+          onSubmit: (title, description) {
+            if (_userId == null) return; // Should not happen
+
+            if (task != null) {
+              // We are in edit mode
+              _updateTask(task, title, description);
+            } else {
+              // We are in add mode
+              _addTask(title, description);
+            }
+          },
+        );
+      },
+    );
+  }
+
+  // --- CRUD Methods implemented directly in the widget state ---
+
+  Future<void> _fetchTasks() async {
+    try {
+      final tasks = await _taskService.getTasks(_userId!);
+      if (mounted) {
+        setState(() {
+          _tasks = tasks;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _addTask(String title, String description) async {
+    final newTask = await _taskService.createTask(title, description, _userId!);
+    setState(() => _tasks.insert(0, newTask));
+  }
+
+  Future<void> _updateTask(Task task, String newTitle, String newDescription) async {
+    task.title = newTitle;
+    task.description = newDescription;
+    await _taskService.updateTask(task);
+    setState(() {}); // Just rebuild the UI to show the change
+  }
+
+  Future<void> _deleteTask(int taskId) async {
+    await _taskService.deleteTask(_userId!, taskId);
+    setState(() => _tasks.removeWhere((task) => task.id == taskId));
+  }
+
+  Future<void> _toggleCompleted(Task task) async {
+    task.completed = !task.completed;
+    await _taskService.updateTask(task);
+    setState(() {});
   }
 
   @override
@@ -69,23 +131,45 @@ class _DashboardPageState extends State<DashboardPage> {
             color: Colors.white,)
         ),
       ),
-      body: ListView.builder(
-        itemCount: _tasks.length,
-        itemBuilder: (context, index) {
-          final task = _tasks[index];
-          return TaskCard(
-            task: task,
-            onToggleCompleted: (bool? value) {
-              setState(() {
-                task.completed = value ?? false;
-              });
-            },
-            // These are placeholders for when I will implement the API service.
-            onUpdate: () {},
-            onDelete: () {},
-          );
-        },
+      body: _buildBody(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showTaskPanel(), // Open the panel in add mode
+        backgroundColor: Colors.purple[800], // Match the AppBar color
+        child: const Icon(Icons.add, color: Colors.white),
       ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Text('An error occurred: $_error'),
+      );
+    }
+
+    if (_tasks.isEmpty) {
+      return const Center(child: Text('No tasks yet. Add one!'));
+    }
+
+    return ListView.builder(
+      itemCount: _tasks.length,
+      itemBuilder: (context, index) {
+        final task = _tasks[index];
+        return TaskCard(
+          task: task,
+          onToggleCompleted: (bool? value) => _toggleCompleted(task),
+          onUpdate: () => _showTaskPanel(task: task),
+          onDelete: () {
+            if (_userId != null) {
+              _deleteTask(task.id);
+            }
+          },
+        );
+      },
     );
   }
 }

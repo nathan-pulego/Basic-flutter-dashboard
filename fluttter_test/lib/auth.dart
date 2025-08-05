@@ -1,11 +1,15 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {
   // Read the base URL from the .env file.
-  // Provide a fallback value in case it's not set.
-  final String baseUrl = dotenv.env['BASE_URL'] ?? 'http://localhost:3000';
+
+  // Using a getter ensures the value is read when it's first accessed,
+  // after main() has had a chance to load the .env file.
+  String get baseUrl => dotenv.env['BASE_URL'] ?? 'http://localhost:3000';
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     final Uri loginUrl = Uri.parse('$baseUrl/auth/login');
@@ -33,14 +37,22 @@ class AuthService {
         return jsonDecode(response.body);
       } else {
         // Provide more detailed error logging for debugging.
+        final String responseBody = response.body;
         print('Failed to login. Status Code: ${response.statusCode}');
-        print('Response Body: ${response.body}');
-        throw Exception('Failed to login');
+        print('Response Body: $responseBody');
+        try {
+          final errorData = jsonDecode(responseBody);
+          // Attempt to extract a specific message from the server's response.
+          final message = errorData['error']?['message'] ?? 'Invalid credentials or server error.';
+          throw Exception(message);
+        } catch (_) {
+          // If the response isn't valid JSON or the format is wrong, fall back to a generic error.
+          throw Exception('Failed to login with status code: ${response.statusCode}');
+        }
       }
-    } catch (e) {
-      // Catch network-level errors (e.g., can't connect).
+    } on http.ClientException catch (e) {
       print('A network error occurred: $e');
-      throw Exception('Failed to connect to the server.');
+      throw Exception('Failed to connect to the server. Please check your network.');
     }
   }
 }
