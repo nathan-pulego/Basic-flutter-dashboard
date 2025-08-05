@@ -40,7 +40,7 @@ class AuthService {
     } catch (e) {
       // Catch network-level errors (e.g., can't connect).
       print('A network error occurred: $e');
-      throw Exception('Failed to connect to the server. Is the API running and on the same network?');
+      throw Exception('Failed to connect to the server.');
     }
   }
 }

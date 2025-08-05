@@ -33,9 +33,9 @@ class _LoginPageState extends State<LoginPage> {
     // First, validate the form. If it's not valid, do nothing.
     if (!_formKey.currentState!.validate()) {
       return; //<== do nothing if form is invalid
-    } 
+    }
 
-    // Then, check if terms are agreed to.
+    // Then, check if terms are agreed to. if not display a message
     if (!_agreedToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -59,14 +59,10 @@ class _LoginPageState extends State<LoginPage> {
 
       // The service handles the status code check. If we get here, it was successful.
       if (mounted) {
-        // Based on your API response, the username is at the top level.
+        //Api response will respond with a username, we will put it here
         // We extract it here and provide a default value if it's not found.
         final String username = responseData['username'] ?? 'User';
-        Navigator.pushNamed(
-          context,
-          '/dashboard',
-          arguments: username,
-        );
+        Navigator.pushNamed(context, '/dashboard', arguments: username);
       }
     } catch (e) {
       // The loginAuth function throws an exception on any failure (bad credentials, network error, etc.).
@@ -99,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
           image: DecorationImage(
             image: AssetImage(
               'images/bg_login.png',
-            ), // Ensure this path is correct in pubspec.yaml
+            ),
             fit: BoxFit.cover,
           ),
         ),
@@ -112,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
               borderRadius: BorderRadius.circular(20),
             ),
             padding: const EdgeInsets.all(16.0),
-            // Wrap the Column with a Form widget
+            // Wrapping the Column with a Form widget
             child: Form(
               // <--- NEW: Form widget
               key: _formKey, // <--- Assign the GlobalKey here

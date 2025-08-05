@@ -4,7 +4,7 @@ import 'package:fluttter_test/dashboard.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
-  // Load the .env file before running the app
+  // Loading the .env file before running the app
   await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
