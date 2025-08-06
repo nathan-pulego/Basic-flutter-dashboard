@@ -61,7 +61,8 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         //Api response will respond with a username, we will put it here
         final String? username = responseData['username'];
-        final int? userId = responseData['userId']; // Assuming API returns 'userId' as an int
+        final int? userId =
+            responseData['userId']; // Assuming API returns 'userId' as an int
 
         // It's crucial to have both username and userId to proceed.
         if (username == null || userId == null) {
@@ -76,6 +77,8 @@ class _LoginPageState extends State<LoginPage> {
         };
 
         Navigator.pushNamed(context, '/dashboard', arguments: userArgs);
+        _emailController.clear();
+        _passwordController.clear();
       }
     } catch (e) {
       // The loginAuth function throws an exception on any failure (bad credentials, network error, etc.).
@@ -106,9 +109,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(
-              'images/bg_login.png',
-            ),
+            image: AssetImage('images/bg_login.png'),
             fit: BoxFit.cover,
           ),
         ),

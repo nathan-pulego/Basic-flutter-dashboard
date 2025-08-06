@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluttter_test/auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttter_test/task_model.dart';
 import 'package:fluttter_test/task_card.dart';
 import 'package:fluttter_test/task_service.dart'; // We'll use the service directly
@@ -25,8 +27,8 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-    // Use a post-frame callback to safely access the context for ModalRoute.
-    // This ensures the widget is fully built before we try to get arguments.
+    _checkLoginStatus();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_isInitialized) {
         _isInitialized = true; // Prevent this from running again
@@ -45,6 +47,14 @@ class _DashboardPageState extends State<DashboardPage> {
         }
       }
     });
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    if (!isLoggedIn && mounted) {
+      Navigator.pushReplacementNamed(context, '/login'); 
+    }
   }
 
   // This single method now handles both adding and editing tasks.
@@ -94,7 +104,12 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> _addTask(String title, String description) async {
-    final newTask = await _taskService.createTask(title, description, _userId!, _userName!);
+    final newTask = await _taskService.createTask(
+      title,
+      description,
+      _userId!,
+      _userName!,
+    );
     if (mounted) {
       setState(() => _tasks.insert(0, newTask));
     }
@@ -137,7 +152,22 @@ class _DashboardPageState extends State<DashboardPage> {
             fontSize: 24,
             color: Colors.white,
           ),
-        ),
+        ),actions: [
+    IconButton(
+      icon: const Icon(Icons.logout),
+      tooltip: 'Logout',
+      onPressed: () async {
+        final prefs = await SharedPreferences.getInstance();
+        
+        await prefs.clear();
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+          AuthService service = AuthService();
+          await service.logout(_userName!);
+        }
+      },
+    ),
+  ],
       ),
       body: _buildBody(),
       floatingActionButton: FloatingActionButton(

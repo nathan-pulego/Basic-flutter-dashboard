@@ -75,6 +75,14 @@ class TaskCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                Text(
+                  'author: ${task.username}',
+                  style: TextStyle(
+                    fontSize: 12.0,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(width: 82.0),
                 TextButton(onPressed: onUpdate, child: const Text('EDIT')),
                 TextButton(
                     onPressed: onDelete,
