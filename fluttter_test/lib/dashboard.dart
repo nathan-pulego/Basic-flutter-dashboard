@@ -53,7 +53,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final prefs = await SharedPreferences.getInstance();
     final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
     if (!isLoggedIn && mounted) {
-      Navigator.pushReplacementNamed(context, '/login'); 
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
@@ -152,27 +152,37 @@ class _DashboardPageState extends State<DashboardPage> {
             fontSize: 24,
             color: Colors.white,
           ),
-        ),actions: [
-    IconButton(
-      icon: const Icon(Icons.logout),
-      tooltip: 'Logout',
-      onPressed: () async {
-        final prefs = await SharedPreferences.getInstance();
-        
-        await prefs.clear();
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, '/login');
-          AuthService service = AuthService();
-          await service.logout(_userName!);
-        }
-      },
-    ),
-  ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.clear();
+              if (mounted) {
+                Navigator.pushReplacementNamed(context, '/login');
+                AuthService service = AuthService();
+                await service.logout(_userName!);
+              }
+            },
+          ),
+        ],
       ),
-      body: _buildBody(),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              'images/ab_purple.jpeg',
+            ), // <-- your background image path
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: _buildBody(),
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showTaskPanel(), // Open the panel in add mode
-        backgroundColor: Colors.purple[800], // Match the AppBar color
+        onPressed: () => _showTaskPanel(),
+        backgroundColor: Colors.purple[800],
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
@@ -188,7 +198,7 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     if (_tasks.isEmpty) {
-      return const Center(child: Text('No tasks yet. Add one!'));
+      return const Center(child: Text('No tasks yet.'));
     }
 
     return ListView.builder(

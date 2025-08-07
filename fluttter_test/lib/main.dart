@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttter_test/login.dart';
 import 'package:fluttter_test/dashboard.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fluttter_test/register.dart';
 
 Future<void> main() async {
   // You must ensure that the Flutter bindings are initialized before running async operations.
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPage(),
         '/dashboard': (context) => const DashboardPage(), // Simplified route
+        '/register': (context) => const RegisterPage(),
       },
     );
   }

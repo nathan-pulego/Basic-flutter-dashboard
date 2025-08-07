@@ -4,10 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {
-  // Read the base URL from the .env file.
-
-  // Using a getter ensures the value is read when it's first accessed,
-  // after main() has had a chance to load the .env file.
   String get baseUrl => dotenv.env['BASE_URL'] ?? 'http://localhost:3000';
 
   Future<Map<String, dynamic>> login(String email, String password) async {
@@ -24,20 +20,21 @@ class AuthService {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, String>{'email': email,'password': password}),
+        body: jsonEncode(<String, String>{
+          'email': email,
+          'password': password,
+        }),
       );
 
       if (response.statusCode == 200) {
         final preference = await SharedPreferences.getInstance();
         final responseData = jsonDecode(response.body);
-        await preference.setBool('isLoggedIn', true );
+        await preference.setBool('isLoggedIn', true);
         await preference.remove('username');
 
         return responseData;
       } else {
-        // Log error and throw a simple exception.
         final String responseBody = response.body;
-        // Use a logging framework in production instead of print.
         print(
           'Login failed. Status Code: ${response.statusCode}, Body: $responseBody',
         );
@@ -64,6 +61,39 @@ class AuthService {
       await preference.remove('username');
     } else {
       throw Exception('Failed to logout.');
+    }
+  }
+
+  Future<Map<String, dynamic>> register(
+    String username,
+    String email,
+    String password,
+  ) async {
+    final Uri registerUrl = Uri.parse('$baseUrl/auth/register');
+
+    try {
+      final response = await http.post(
+        registerUrl,
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode({
+          'username': username,
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+        
+      } else {
+        print('Registration failure, Status code: ${response.statusCode}');
+        throw Exception('Registration failed.: ${response.body}');
+      }
+    } catch (e) {
+      print('A network error occurred: $e');
+      throw Exception(
+        'Failed to connect to the server. Please check your network.',
+      );
     }
   }
 }

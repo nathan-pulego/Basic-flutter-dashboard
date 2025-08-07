@@ -29,6 +29,10 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  void _register() {
+    Navigator.pushNamed(context, '/register');
+  }
+
   Future<void> _login() async {
     // First, validate the form. If it's not valid, do nothing.
     if (!_formKey.currentState!.validate()) {
@@ -203,7 +207,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
 
                   ElevatedButton(
                     onPressed: _isLoading ? null : _login,
@@ -217,6 +221,10 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           )
                         : const Text('Login'),
+                  ),
+                  TextButton(
+                    onPressed: _register,
+                    child: const Text('Register here'),
                   ),
                 ],
               ),
