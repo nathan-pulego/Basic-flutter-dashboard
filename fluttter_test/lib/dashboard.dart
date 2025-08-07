@@ -173,7 +173,7 @@ class _DashboardPageState extends State<DashboardPage> {
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage(
-              'images/ab_purple.jpeg',
+              'images/dashboard.png',
             ), // <-- your background image path
             fit: BoxFit.cover,
           ),
@@ -198,7 +198,15 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     if (_tasks.isEmpty) {
-      return const Center(child: Text('No tasks yet.'));
+      return const Center(
+        child: Text(
+          'Create new task',
+          style: TextStyle(
+            fontSize: 20,
+            color: Color.fromARGB(255, 255, 255, 255),
+          ),
+        ),
+      );
     }
 
     return ListView.builder(
