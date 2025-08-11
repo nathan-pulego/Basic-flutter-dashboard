@@ -210,18 +210,26 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 10),
 
                   ElevatedButton(
-                    onPressed: _isLoading ? null : _login,
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.purple,
-                              strokeWidth: 2.0,
+                              onPressed: _isLoading ? null : _login,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.purple[800],
+
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2.0,
+                                      ),
+                                    )
+                                  : const Text('Login'),
                             ),
-                          )
-                        : const Text('Login'),
-                  ),
                   TextButton(
                     onPressed: _register,
                     child: const Text('Register here'),
