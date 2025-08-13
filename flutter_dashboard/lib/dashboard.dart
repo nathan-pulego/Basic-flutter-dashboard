@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:fluttter_test/auth.dart';
+import 'package:flutter_dashboard/task_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fluttter_test/task_model.dart';
-import 'package:fluttter_test/task_card.dart';
-import 'package:fluttter_test/task_service.dart'; // We'll use the service directly
-import 'package:fluttter_test/task_form.dart';
+import 'package:flutter_dashboard/models/task_model.dart';
+import 'package:flutter_dashboard/task_card.dart';
+import 'package:flutter_dashboard/services/api.service.dart'; // We'll use the service directly
+import 'package:flutter_dashboard/task_form.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -18,10 +19,7 @@ class _DashboardPageState extends State<DashboardPage> {
   int? _userId;
 
   // State is now managed directly inside the widget
-  final TaskService _taskService = TaskService();
-  List<Task> _tasks = [];
-  bool _isLoading = true; // Start in loading state
-  String? _error;
+  AuthService service = AuthService();
   bool _isInitialized = false;
 
   @override
@@ -32,6 +30,7 @@ class _DashboardPageState extends State<DashboardPage> {
       if (!_isInitialized) {
         _isInitialized = true; // Prevent this from running again
         // Retrieve the map of arguments passed from the login page.
+        final taskProvider = Provider.of<TaskProvider>(context, listen: false);
         final arguments =
             ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
@@ -42,7 +41,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
         // Fetch tasks if we have a user ID
         if (_userId != null) {
-          _fetchTasks();
+          taskProvider.fetchTasks(_userId!);
         }
       }
     });
@@ -65,75 +64,40 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (context) {
         return TaskForm(
           task: task, // Pass the existing task if editing, or null if adding.
-          onSubmit: (title, description) {
-            if (_userId == null) return; // Should not happen
+          onSubmit: (title, description) async {
+            if (_userId == null) return;
 
-            if (task != null) {
-              // We are in edit mode
-              _updateTask(task, title, description);
-            } else {
-              // We are in add mode
-              _addTask(title, description);
+            final taskProvider = Provider.of<TaskProvider>(
+              context,
+              listen: false,
+            );
+
+            try {
+              if (task != null) {
+                await taskProvider.updateTask(
+                  task,
+                  title,
+                  description,
+                  _userId!,
+                );
+              } else {
+                await taskProvider.createTask(
+                  title,
+                  description,
+                  _userName!,
+                  _userId!,
+                );
+                print('triggered if task is null');
+              }
+            } catch (e) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
             }
           },
         );
       },
     );
-  }
-
-  // --- CRUD Methods implemented directly in the widget state ---
-
-  Future<void> _fetchTasks() async {
-    try {
-      final tasks = await _taskService.getTasks(_userId!);
-      if (mounted) {
-        setState(() {
-          _tasks = tasks;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = e.toString();
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _addTask(String title, String description) async {
-    final newTask = await _taskService.createTask(
-      title,
-      description,
-      _userId!,
-      _userName!,
-    );
-    if (mounted) {
-      setState(() => _tasks.insert(0, newTask));
-    }
-  }
-
-  Future<void> _updateTask(
-    Task task,
-    String newTitle,
-    String newDescription,
-  ) async {
-    task.title = newTitle;
-    task.description = newDescription;
-    await _taskService.updateTask(task, _userId!);
-    setState(() {}); // Just rebuild the UI to show the change
-  }
-
-  Future<void> _deleteTask(int taskId) async {
-    await _taskService.deleteTask(_userId!, taskId);
-    setState(() => _tasks.removeWhere((task) => task.id == taskId));
-  }
-
-  Future<void> _toggleCompleted(Task task) async {
-    task.completed = !task.completed;
-    await _taskService.updateTask(task, _userId!);
-    setState(() {});
   }
 
   @override
@@ -161,7 +125,6 @@ class _DashboardPageState extends State<DashboardPage> {
               await prefs.clear();
               if (mounted) {
                 Navigator.pushReplacementNamed(context, '/login');
-                AuthService service = AuthService();
                 await service.logout(_userName!);
               }
             },
@@ -188,15 +151,17 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildBody() {
-    if (_isLoading) {
+    final taskProvider = Provider.of<TaskProvider>(context);
+
+    if (taskProvider.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_error != null) {
-      return Center(child: Text('An error occurred: $_error'));
+    if (taskProvider.error != null) {
+      return Center(child: Text('An error occurred: ${taskProvider.error}'));
     }
 
-    if (_tasks.isEmpty) {
+    if (taskProvider.tasks.isEmpty) {
       return const Center(
         child: Text(
           'Create new task',
@@ -209,16 +174,17 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     return ListView.builder(
-      itemCount: _tasks.length,
+      itemCount: taskProvider.tasks.length,
       itemBuilder: (context, index) {
-        final task = _tasks[index];
+        final task = taskProvider.tasks[index];
         return TaskCard(
           task: task,
-          onToggleCompleted: (bool? value) => _toggleCompleted(task),
+          onToggleCompleted: (bool? value) =>
+              taskProvider.toggleCompleted(task, _userId!),
           onUpdate: () => _showTaskPanel(task: task),
           onDelete: () {
             if (_userId != null) {
-              _deleteTask(task.id);
+              taskProvider.deleteTask(_userId!, task.id);
             }
           },
         );

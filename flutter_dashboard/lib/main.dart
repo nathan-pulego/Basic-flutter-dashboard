@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:fluttter_test/login.dart';
-import 'package:fluttter_test/dashboard.dart';
+import 'package:flutter_dashboard/login.dart';
+import 'package:flutter_dashboard/dashboard.dart';
+import 'package:flutter_dashboard/task_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:fluttter_test/register.dart';
+import 'package:flutter_dashboard/register.dart';
+import 'package:provider/provider.dart';
 
 Future<void> main() async {
-  // You must ensure that the Flutter bindings are initialized before running async operations.
   WidgetsFlutterBinding.ensureInitialized();
-  // Loading the .env file before running the app
   await dotenv.load(fileName: ".env");
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => TaskProvider(),
+      child: const MyApp(),
+    ) 
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -23,7 +28,7 @@ class MyApp extends StatelessWidget {
       home: const LoginPage(),
       routes: {
         '/login': (context) => const LoginPage(),
-        '/dashboard': (context) => const DashboardPage(), // Simplified route
+        '/dashboard': (context) => const DashboardPage(), 
         '/register': (context) => const RegisterPage(),
       },
     );

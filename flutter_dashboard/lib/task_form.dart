@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttter_test/task_model.dart';
+import 'package:flutter_dashboard/models/task_model.dart';
 
 class TaskForm extends StatefulWidget {
   // The task to be edited. If null, we are creating a new task.

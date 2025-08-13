@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttter_test/task_model.dart';
+import 'package:flutter_dashboard/models/task_model.dart';
 
 class TaskCard extends StatelessWidget {
   final Task task;

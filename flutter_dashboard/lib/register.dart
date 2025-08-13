@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fluttter_test/auth.dart';
+import 'package:flutter_dashboard/services/api.service.dart';
+import 'package:flutter_dashboard/utils.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -80,7 +81,7 @@ class _RegisterPageState extends State<RegisterPage> {
             decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('images/bg_login.png'),
-                fit: BoxFit.cover,        
+                fit: BoxFit.cover,
               ),
             ),
           ),
@@ -93,6 +94,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: Container(
                       width: 320.0,
                       decoration: BoxDecoration(
+                        // ignore: deprecated_member_use
                         color: Colors.white.withOpacity(0.8),
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -145,10 +147,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter your email';
                                 }
-                                if (!value.contains('@') ||
-                                    !value.contains('.')) {
+                                if (!emailRegex.hasMatch(value)) {
                                   return 'Please enter a valid email';
                                 }
+
                                 return null;
                               },
                             ),
@@ -169,9 +171,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter your password';
                                 }
-                                if (value.length < 8) {
-                                  return 'Password must be at least 8 characters long.';
-                                }
+                               
                                 return null;
                               },
                             ),

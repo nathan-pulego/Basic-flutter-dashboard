@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttter_test/auth.dart';
+import 'package:flutter_dashboard/services/api.service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -121,6 +121,7 @@ class _LoginPageState extends State<LoginPage> {
             width: 300.0,
             height: 450.0,
             decoration: BoxDecoration(
+              // ignore: deprecated_member_use
               color: Colors.white.withOpacity(0.8),
               borderRadius: BorderRadius.circular(20),
             ),
@@ -209,26 +210,26 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 10),
 
                   ElevatedButton(
-                              onPressed: _isLoading ? null : _login,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.purple[800],
+                    onPressed: _isLoading ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purple[800],
 
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2.0,
-                                      ),
-                                    )
-                                  : const Text('Login'),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.0,
                             ),
+                          )
+                        : const Text('Login'),
+                  ),
                   TextButton(
                     onPressed: _register,
                     child: const Text('Register here'),
