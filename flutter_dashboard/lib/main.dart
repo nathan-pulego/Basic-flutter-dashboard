@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dashboard/login.dart';
-import 'package:flutter_dashboard/dashboard.dart';
+import 'package:flutter_dashboard/routes/router.dart';
 import 'package:flutter_dashboard/task_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_dashboard/register.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  await SharedPreferences.getInstance();
   runApp(
     ChangeNotifierProvider(
       create: (_) => TaskProvider(),
@@ -22,15 +22,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: "Cloud User Dashboard",
-      home: const LoginPage(),
-      routes: {
-        '/login': (context) => const LoginPage(),
-        '/dashboard': (context) => const DashboardPage(), 
-        '/register': (context) => const RegisterPage(),
-      },
+      routerConfig: appRouter,
     );
   }
 }
