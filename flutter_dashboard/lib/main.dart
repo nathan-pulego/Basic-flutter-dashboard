@@ -7,7 +7,6 @@ import 'package:fluttter_test/register.dart';
 Future<void> main() async {
   // You must ensure that the Flutter bindings are initialized before running async operations.
   WidgetsFlutterBinding.ensureInitialized();
-
   // Loading the .env file before running the app
   await dotenv.load(fileName: ".env");
   runApp(const MyApp());
@@ -20,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "Login",
+      title: "Cloud User Dashboard",
       home: const LoginPage(),
       routes: {
         '/login': (context) => const LoginPage(),

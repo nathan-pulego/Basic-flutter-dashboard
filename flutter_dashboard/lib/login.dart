@@ -3,7 +3,6 @@ import 'package:fluttter_test/auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
-
   @override
   State<LoginPage> createState() => _LoginPageState();
 }

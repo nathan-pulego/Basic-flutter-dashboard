@@ -28,7 +28,6 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     _checkLoginStatus();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_isInitialized) {
         _isInitialized = true; // Prevent this from running again
