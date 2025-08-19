@@ -13,7 +13,13 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/dashboard',
-      builder: (context, state) => const DashboardPage(),
+      builder: (context, state) {
+        final arguments  = state.extra as Map<String, dynamic>?;
+        return DashboardPage(
+        userArgs: arguments
+
+        );
+      }
     ),
   ],
 );

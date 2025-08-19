@@ -110,7 +110,7 @@ class TaskService {
     final uri = Uri.parse('$_baseUrl/users/$userId/dashboard');
     final response = await http.get(uri, headers: _headers);
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 204) {
       final List<dynamic> taskJson = json.decode(response.body);
       return taskJson.map((json) => Task.fromJson(json)).toList();
     } else {

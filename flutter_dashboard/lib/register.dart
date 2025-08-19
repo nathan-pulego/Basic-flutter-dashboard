@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/services/api.service.dart';
 import 'package:flutter_dashboard/utils.dart';
+import 'package:go_router/go_router.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -25,7 +26,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void login() {
-    Navigator.pushNamed(context, '/login');
+    context.go('/login');
   }
 
   Future<void> _register() async {
@@ -171,7 +172,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter your password';
                                 }
-                               
+
                                 return null;
                               },
                             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/task_provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dashboard/models/task_model.dart';
@@ -8,7 +9,8 @@ import 'package:flutter_dashboard/services/api.service.dart'; // We'll use the s
 import 'package:flutter_dashboard/task_form.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  final Map<String, dynamic>? userArgs;
+  const DashboardPage({super.key, this.userArgs});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -25,18 +27,19 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
+    final args = widget.userArgs as Map<String, dynamic>?;
+
     _checkLoginStatus();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_isInitialized) {
         _isInitialized = true; // Prevent this from running again
         // Retrieve the map of arguments passed from the login page.
         final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-        final arguments =
-            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-
+        final prefs = SharedPreferences.getInstance();
+       
         setState(() {
-          _userName = arguments?['username'] as String?;
-          _userId = arguments?['userId'] as int?;
+          _userName = args?['username'] as String?;
+          _userId = args?['userId'] as int?;
         });
 
         // Fetch tasks if we have a user ID
@@ -46,12 +49,14 @@ class _DashboardPageState extends State<DashboardPage> {
       }
     });
   }
-
+  void _logout() {
+    context.go('/login');
+  }
   Future<void> _checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
     if (!isLoggedIn && mounted) {
-      Navigator.pushReplacementNamed(context, '/login');
+      context.go('/login');
     }
   }
 
@@ -124,7 +129,7 @@ class _DashboardPageState extends State<DashboardPage> {
               final prefs = await SharedPreferences.getInstance();
               await prefs.clear();
               if (mounted) {
-                Navigator.pushReplacementNamed(context, '/login');
+                _logout();
                 await service.logout(_userName!);
               }
             },

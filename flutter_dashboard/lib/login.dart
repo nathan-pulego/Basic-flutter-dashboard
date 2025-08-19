@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/services/api.service.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -29,8 +31,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _register() {
-    Navigator.pushNamed(context, '/register');
+    context.go('/register');
   }
+
+  //add navigation for register to navigate to the register page
 
   Future<void> _login() async {
     // First, validate the form. If it's not valid, do nothing.
@@ -78,8 +82,13 @@ class _LoginPageState extends State<LoginPage> {
           'username': username,
           'userId': userId,
         };
-
-        Navigator.pushNamed(context, '/dashboard', arguments: userArgs);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setString('username', username);
+        context.go('/dashboard', extra: {
+          'username': username,
+          'userId': userId,
+        });
         _emailController.clear();
         _passwordController.clear();
       }
